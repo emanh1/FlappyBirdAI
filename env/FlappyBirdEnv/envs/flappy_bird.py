@@ -13,10 +13,9 @@ pygame.init()
 pygame.display.init()
 
 class FlappyBirdEnv(gym.Env):
-    metadata = {"render_modes": ["human"], "render_fps": 30}
+    metadata = {"render_modes": ["human"], "render_fps": 45}
 
     def __init__(self, render_mode=None):
-        # First 5 values represent: bird_y, velocity_y, horizontal_distance, upper_pipe_y, lower_pipe_y
         self.observation_space = spaces.Box(
             low=np.array([0, -8, 0, -512, 0]), 
             high=np.array([512, 10, 288, 0, 512]), 
@@ -26,8 +25,8 @@ class FlappyBirdEnv(gym.Env):
 
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
-
-        self.window = pygame.display.set_mode()
+        self.flag = True
+        self.window = pygame.display.set_mode((0,0))
         self.clock = None
 
         self.screen_width = 258
@@ -140,11 +139,13 @@ class FlappyBirdEnv(gym.Env):
 
     def step(self, action):
         reward = 0.1
-        terminated = False
+        terminal = False
+        # Check input action
         if action == 1:
             self.current_velocity_y = self.upward_speed
             self.is_flapped = True
-
+        else:
+            self.is_flapped = False
         # Update score
         bird_center_x = self.bird_x + self.bird_width / 2
         for pipe in self.pipes:
@@ -169,29 +170,31 @@ class FlappyBirdEnv(gym.Env):
         if self.bird_y < 0:
             self.bird_y = 0
 
+        # Update pipes' position
         for pipe in self.pipes:
             pipe["x_upper"] += self.pipe_velocity_x
             pipe["x_lower"] += self.pipe_velocity_x
-
+        # Update pipes
         if 0 < self.pipes[0]["x_lower"] < 5:
             self.pipes.append(self.generate_pipe())
         if self.pipes[0]["x_lower"] < -self.pipe_width:
             del self.pipes[0]
         if self.is_collided():
-            terminated = True
+            terminal = True
             reward = -1
-
+        
         observation = self._get_obs()
         info = self._get_info()
 
         if self.render_mode == "human":
             self.render()
 
-        return observation, reward, terminated, False, info
+        return observation, reward, terminal, False, info
 
     def render(self):
-        if self.render_mode == "human":
+        if self.flag and self.render_mode == "human":
             self.window = pygame.display.set_mode((self.screen_width, self.screen_height))
+            self.flag = False
         if self.clock is None and self.render_mode == "human":
             self.clock = pygame.time.Clock()
         
