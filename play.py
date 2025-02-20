@@ -15,7 +15,6 @@ def play_flappy_bird():
                 # Flap on mouse click
                 observation, reward, terminated, truncated, info = env.step(1)
                 
-                print(observation)
                 if terminated:
                     observation, info = env.reset()
             
@@ -23,7 +22,6 @@ def play_flappy_bird():
         observation, reward, terminated, truncated, info = env.step(0)
         if terminated:
             observation, info = env.reset()
-        print(observation)
             
     env.close()
 
