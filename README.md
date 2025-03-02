@@ -9,7 +9,11 @@ A reinforcement learning project that trains an AI agent to play Flappy Bird usi
 ```bash
 pip install gymnasium pygame stable-baselines3
 ```
-
+3. Install the gymnasium env:
+```bash
+cd env
+pip install -e .
+```
 ## Project Structure
 
 - `train.py` - Script to train the DQN model
